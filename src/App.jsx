@@ -4,8 +4,10 @@ import HomePage from '../pages/homePage'
 import LoginPage from '../pages/loginPage'
 import RegisterPage from '../pages/registerPage'
 import './App.css'
-import AdminPage from '../pages/adminPage'
+
 import { Toaster } from 'react-hot-toast'
+import AdminPage from '../pages/adminPage'
+
 
 function App() {
  
