@@ -5,6 +5,7 @@ import { Link, Route, Routes } from "react-router-dom";
 import AdminDashboard from "./admin/adminDashboard";
 import { Outlet } from "react-router-dom";
 import UsersAdminPage from "./admin/usersAdminPage";
+import AddUsersAdminPage from "./admin/addUsersAdminPage";
 
 
 
@@ -17,7 +18,7 @@ export default function AdminPage(){
 
                 <Link className="flex flex-row h-[60px] w-full p-[20px] items-center text-xl gap-[25px]" to="dashboard"><MdDashboard />Admin Dashboard </Link>
                 
-                  <Link className="flex flex-row h-[60px] w-full p-[20px] items-center text-xl gap-[25px]" to="users"><FaUser />users</Link>
+                  <Link className="flex flex-row h-[60px] w-full p-[20px] items-center text-xl gap-[25px]" to="users"><FaUser />Users</Link>
                    <Link className="flex flex-row h-[60px] w-full p-[20px] items-center text-xl gap-[25px]"  to="courses"><FaBook />Courses</Link>
                    <Link className="flex flex-row h-[60px] w-full p-[20px] items-center text-xl gap-[25px]" to="payments"><FaCashRegister />Payments</Link>
                  </div>
@@ -31,6 +32,7 @@ export default function AdminPage(){
              <Route path="/dashboard" element ={<AdminDashboard />} />
                   <Route path="/courses" element ={<h1>Courses</h1>}/>
                   <Route path="/users" element={<UsersAdminPage/>}/>
+                  <Route path="users/newUser" element={<AddUsersAdminPage/>}/>
                   <Route path="/payments" element={<h1>Payments</h1>}/>
                 
                   
