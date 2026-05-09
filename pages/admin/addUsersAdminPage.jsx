@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
@@ -18,10 +19,7 @@ const [formData, setFormData] = useState({
   email: "",
   password: "",
   role: "",
-   notifications: {
-    email: true,
-    sms: false
-  },
+   notifications:"",
 
   classLevel: "",
   guardianType: "",
@@ -29,6 +27,7 @@ const [formData, setFormData] = useState({
   guardianPhoneNo: "",
 
   address: "",
+  isBlocked: false,
   profilePic: "",
 
  
@@ -87,6 +86,9 @@ if (!validRoles.includes(formData.role)) {
   newErrors.guardianPhoneNo = "Phone number must be 10 digits";
 }
  }
+ if (!formData.notifications) {
+  newErrors.notifications = "Notification type is required";
+}
 
          
 
@@ -109,15 +111,6 @@ function handleChange(e) {
   }));
 }
 
-function handleNotificationChange(type) {
-  setFormData(prev => ({
-    ...prev,
-    notifications: {
-      ...prev.notifications,
-      [type]: !prev.notifications[type]
-    }
-  }));
-}
 
 function handleSubmit(){
   setServerError("");
@@ -149,13 +142,14 @@ function handleSubmit(){
         Authorization:"Bearer " + token
     }
   }).then((res)=>{
-    alert(res.data.message)
+   toast.success ("User created Successfully")
     console.log("User creates successfully");
     navigate("/admin/users")
     console.log(res.data);
   
   }).catch((error)=>{
   const msg = error.response?.data?.message || "Something went wrong";
+  toast.error("Failed to add user")
   setServerError(msg);
   console.error("Error adding user: ", error );
 })
@@ -258,31 +252,26 @@ className="w-full border h-[40px] rounded-md shadow-lg"/>
     {errors.password}
   </span>
 )}
- <div className="flex gap-4">
-        <label className="text-sm font-semibold"> Notifications </label>
-
-   <div className="flex gap-2">
-  <input
-    type="checkbox" 
-    checked={formData.notifications.email}
-    onChange={()=>handleNotificationChange("email")}
-  />
-  <span>Email</span>
 </div>
+ <div className="w-[200px] flex flex-col gap-[5px]">
+<label className="text-sm font-semibold">Notifications </label>
 
-<div className="flex gap-2">
-  <input
-    type="checkbox"
-    checked={formData.notifications.sms}
-    onChange={()=>handleNotificationChange("sms")
-    }
-  />
-  <span>SMS</span>
-</div>
+<select id="notifications" name="notifications"
+value={formData.notifications}
+onChange={handleChange}
+className="w-full border h-[40px] rounded-md shadow-lg">
+   <option value="">Select Notification Type</option>
+ <option value="Email"> Email </option>
+     <option value="SMS"> SMS </option>
+    
+</select>
+{errors.notifications && (
+  <span className="text-red-500 text-xs">
+    {errors.notifications}
+  </span>
+)}
+ </div>
 
-    </div>
-
-    </div>
      <div className="w-[200px] flex flex-col gap-[5px]">
 <label className="text-sm font-semibold"> Role </label>
 <select id="role" name="role"
@@ -414,7 +403,7 @@ className="w-full border h-[40px] rounded-md shadow-lg"/>
 )}
 <button
   onClick={handleSubmit}
-  className="w-[200px] h-[40px] bg-blue-500 text-white rounded-md shadow-lg flex justify-center items-center border-[2px]">
+  className="w-[200px] h-[50px] bg-blue-500 text-white rounded-md flex justify-center items-center border-[2px] ml-[20px]">
   Add User
 </button>
 
@@ -425,7 +414,8 @@ className="w-full border h-[40px] rounded-md shadow-lg"/>
 
 
 </div>
+)
+}
 
       
-    )
-}
+    
