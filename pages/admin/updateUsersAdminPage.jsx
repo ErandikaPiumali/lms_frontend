@@ -3,36 +3,83 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { useEffect } from "react";
 
-
-export default function AddUsersAdminPage(){
+export default function UpdateUsersAdminPage(){
   const navigate = useNavigate();
   const [serverError, setServerError] = useState("")
   const [errors,setErrors] = useState({});
 
+  const [formData, setFormData ] = useState ({
+      firstName: "",
+      lastName:  "",
+      gender:  "",
+      phoneNo: "",
+      email: "",
+     
 
-const [formData, setFormData] = useState({
-  firstName: "",
-  lastName: "",
-  gender: "",
-  phoneNo: "",
-  email: "",
-  password: "",
-  role: "",
-   notifications:"",
+      classLevel: "",
+      guardianType: "",
+      guardianName: "",
+      guardianPhoneNo:  "",
 
-  classLevel: "",
-  guardianType: "",
-  guardianName: "",
-  guardianPhoneNo: "",
+      address:  "",
+      isBlocked: false,
+      profilePic: "",
+      isPhoneVerified:  false,
+      isEmailVerified:  false,
+    
+    });
 
-  address: "",
-  isBlocked: false,
-  profilePic: "",
+const { userId } = useParams();
 
- 
-});
 
+useEffect(() => {
+
+  const token = localStorage.getItem("token");
+ axios.get(
+    import.meta.env.VITE_BACKEND_URL + "/api/users/" + userId,
+    
+    {
+      headers:{
+        Authorization:"Bearer " + token
+      }
+    }
+  )
+  .then((res)=>{
+
+    const user = res.data;
+
+    setFormData({
+    firstName: user.firstName || "",
+    lastName: user.lastName || "",
+    gender: user.gender || "",
+    phoneNo: user.phoneNo || "",
+    email: user.email || "",
+    role: user.role || "",
+    notifications: user.notifications || "",
+    classLevel: user.classLevel || "",
+    guardianType: user.guardianType || "",
+    guardianName: user.guardianName || "",
+    guardianPhoneNo: user.guardianPhoneNo || "",
+    address: user.address || "",
+    profilePic: user.profilePic || "",
+    isBlocked: user.isBlocked || false,
+    isPhoneVerified: user.isPhoneVerified || false,
+    isEmailVerified: user.isEmailVerified || false,
+  });
+
+
+
+   
+  })
+  .catch((err)=>{
+    console.log(err);
+    toast.error("Failed to load user");
+  });
+
+}, []);
 
 function validationForm(){
 
@@ -50,9 +97,7 @@ const validGuardianTypes = ["Mother","Father","Guardian"];
     } else if(!/^\S+@\S+\.\S+$/.test(formData.email)) {
   newErrors.email = "Invalid email format";
 }
-     if(!formData.password || formData.password.length < 8)
-      newErrors.password = "Password must be at least 8 characters";
-
+   
   if (!formData.gender) {
   newErrors.gender = "Select gender";
 }
@@ -63,16 +108,18 @@ const validGuardianTypes = ["Mother","Father","Guardian"];
         newErrors.phoneNo = "Phone Number must be 10 digits"
       }
 
-      if (formData.role === "Student") {
-  if (!validLevels.includes(formData.classLevel)) {
-    newErrors.classLevel = "Select a valid class level";
-  }
-}
 
   
 
 if (!validRoles.includes(formData.role)) {
   newErrors.role = "Invalid role selected";
+}
+
+if (
+  formData.role === "Student" &&
+  !validLevels.includes(formData.classLevel)
+) {
+  newErrors.classLevel = "Invalid class level";
 }
         if(formData.role === "Student"){
           if(formData.classLevel  !== "Adult" ) {
@@ -86,10 +133,7 @@ if (!validRoles.includes(formData.role)) {
   newErrors.guardianPhoneNo = "Phone number must be 10 digits";
 }
  }
- if (!formData.notifications) {
-  newErrors.notifications = "Notification type is required";
-}
-
+ 
          
 
 if (formData.role === "Student" && formData.classLevel !== "Adult") {
@@ -105,9 +149,14 @@ setErrors(newErrors);
 function handleChange(e) {
   const { name, value } = e.target;
 
+   const booleanFields = ["isBlocked", "isEmailVerified", "isPhoneVerified"];
+  const parsedValue = booleanFields.includes(name)
+    ? value === "true"
+    : value;
+
   setFormData(prev => ({
     ...prev,
-    [name]: value
+    [name]: parsedValue
   }));
 }
 
@@ -137,19 +186,19 @@ function handleSubmit(){
     window.location.href="/login";
     return;
   }
-  axios.post(import.meta.env.VITE_BACKEND_URL + "/api/users", userData,{
+  axios.put(import.meta.env.VITE_BACKEND_URL + "/api/users/"+ userId, userData,{
     headers:{
         Authorization:"Bearer " + token
     }
   }).then((res)=>{
-   toast.success ("User created Successfully")
-    console.log("User creates successfully");
+   toast.success ("User updated Successfully")
+    console.log("User updated successfully");
     navigate("/admin/users")
     console.log(res.data);
   
   }).catch((error)=>{
   const msg = error.response?.data?.message || "Something went wrong";
-  toast.error("Failed to add user")
+  toast.error("Failed to update user")
   setServerError(msg);
   console.error("Error adding user: ", error );
 })
@@ -241,18 +290,7 @@ className="w-full border h-[40px] rounded-md shadow-lg"/>
 )}
 
     </div>
-     <div className="w-[200px] flex flex-col gap-[5px]">
-<label className="text-sm font-semibold"> Password </label>
-<input type="password" name="password"
-value={formData.password}
-onChange={handleChange}
-className="w-full border h-[40px] rounded-md shadow-lg"/>
-{errors.password && (
-  <span className="text-red-500 text-xs">
-    {errors.password}
-  </span>
-)}
-</div>
+   
  <div className="w-[200px] flex flex-col gap-[5px]">
 <label className="text-sm font-semibold">Notifications </label>
 
@@ -302,7 +340,7 @@ className="w-full border h-[40px] rounded-md shadow-lg">
 value={formData.classLevel}
 onChange={handleChange}
 className="w-full border h-[40px] rounded-md shadow-lg">
-     <option value="Select Grade"> Select Grade </option>
+     <option value=""> Select Grade </option>
     <option value="Grade 11"> Grade 11 </option>
      <option value="Grade 12">Grade 12 </option>
       <option value="Grade 13">Grade 13 </option>
@@ -389,6 +427,32 @@ onChange={handleChange}
 className="w-full border h-[40px] rounded-md shadow-lg"/>
 
     </div>
+ <div className="w-[200px] flex flex-col gap-[5px]">
+  <label className="text-sm font-semibold">Block User</label>
+  <select name="isBlocked" value={formData.isBlocked} onChange={handleChange}
+    className="w-full border h-[40px] rounded-md shadow-lg">
+    <option value={false}>Active</option>
+    <option value={true}>Blocked</option>
+  </select>
+</div>   
+
+<div className="w-[200px] flex flex-col gap-[5px]">
+  <label className="text-sm font-semibold">Phone Verified</label>
+  <select name="isPhoneVerified" value={formData.isPhoneVerified} onChange={handleChange}
+    className="w-full border h-[40px] rounded-md shadow-lg">
+    <option value={false}>No</option>
+    <option value={true}>Yes</option>
+  </select>
+</div>
+
+<div className="w-[200px] flex flex-col gap-[5px]">
+  <label className="text-sm font-semibold">Email Verified</label>
+  <select name="isEmailVerified" value={formData.isEmailVerified} onChange={handleChange}
+    className="w-full border h-[40px] rounded-md shadow-lg">
+    <option value={false}>No</option>
+    <option value={true}>Yes</option>
+  </select>
+</div>
     
 
 <div className="w-full flex justify-center flex-row py-[20px]">
@@ -404,7 +468,7 @@ className="w-full border h-[40px] rounded-md shadow-lg"/>
 <button
   onClick={handleSubmit}
   className="w-[200px] h-[50px] bg-blue-500 text-white rounded-md flex justify-center items-center border-[2px] ml-[20px]">
-  Add User
+  Update User
 </button>
 
 

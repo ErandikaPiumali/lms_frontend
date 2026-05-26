@@ -218,7 +218,7 @@ useEffect(() => {
                       }/>
                       <BiEdit onClick={
                         ()=>{
-                          navigate("/admin/updateUser",
+                          navigate("/admin/users/update/" + User.userId,
                             {
                               state:User
                             }

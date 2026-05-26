@@ -40,10 +40,11 @@ export default function LoginPage(){
         <div className="w-full min-h-screen bg-gray-100 flex flex-col">
 
 {/*heading Image*/}
-        <div className="w-full h-62.5 bg-[url(./loginImageLMs.jpg)] bg-cover bg-top ">
-        </div>
+        <div className="w-full h-screen bg-[url(./login_image.jpg)] bg-cover bg-center flex justify-center items-center ">
+       
 
 {/*form*/}
+<div className="w-[500px] h-[500px] backdrop-blur-sm shadow-2xl rounded-[30px] text-white">
             <div className=" flex-1 flex items-center justify-center ">
                  <div className="w-[500px] h-[500px] rounded-xl flex flex-col items-center justify-center">
                     <h1 className="  text-2xl font-bold text-center mb-5"> Login </h1>
@@ -68,6 +69,7 @@ export default function LoginPage(){
                             }
                         } type="password" className="w-[350px] h-[40px] border border-gray-400 rounded-xl"></input>
                     </div>
+
 {/*Loging button*/}
 <button
 onClick={login}
@@ -79,8 +81,10 @@ className="w-[350px] h-[40px] bg-blue-500 rounded-xl text-white text-lg mt-5 hov
         
         </div>
             </div>
+            </div>
           
         
         </div>
+         </div>
     )
 }
