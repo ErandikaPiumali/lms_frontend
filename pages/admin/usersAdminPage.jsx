@@ -11,18 +11,22 @@ export default function UsersAdminPage(){
   const [users, setUsers] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [filters, setFilter] = useState({
-    userId:"", role:"", isBlocked:false
+    userId:"", role:"", isBlocked:""
   });
+ 
 const navigate = useNavigate();
   
 const fetchUsers = () => {
+  setIsLoading(true);
   const token = localStorage.getItem("token");
 
   const params = {};
 
   if (filters.userId) params.userId = filters.userId;
   if (filters.role) params.role = filters.role;
-  if (filters.isBlocked !== true) params.isBlocked = filters.isBlocked;
+  if (filters.isBlocked !== "" && filters.isBlocked !== null){
+    params.isBlocked = filters.isBlocked;
+  }
 
   axios.get(import.meta.env.VITE_BACKEND_URL + "/api/users", {
     headers: {
@@ -40,6 +44,7 @@ const fetchUsers = () => {
     setIsLoading(false);
   });
 };  
+ 
 useEffect(() => {
 
   const token = localStorage.getItem("token");
@@ -48,18 +53,19 @@ useEffect(() => {
     navigate("/login");
     return;
   }
+  fetchUsers();
 
- fetchUsers();
-}, []);
+}, [filters]);
+
  
 
     return(
-    
-      <div className="w-full h-full flex flex-col p-6 bg-gray-100 ">
+     
+      <div className=" w-full h-full flex flex-col p-6 bg-gray-100 text-black">
 
        <div className="mb-6">
         <div className=" text-xl font-bold text-gray-800">User management</div>
-        <p className="text-gray-500">View, add, and manage system users</p>
+        <p className="text-gray-500">Manage system users</p>
         
       </div>
      
@@ -95,7 +101,10 @@ useEffect(() => {
    <select
     value={filters.isBlocked}
     onChange={(e) =>
-      setFilter({ ...filters, isBlocked: e.target.value })
+      setFilter({ ...filters, isBlocked: e.target.value === "" 
+        ? ""
+:e.target.value === "true"
+       })
     }
     className="border px-3 py-2 rounded"
   >
@@ -107,18 +116,18 @@ useEffect(() => {
        <button
     onClick={() => {
       setIsLoading(true);
+     
       fetchUsers();
     }}
-    className="border px-4 py-2 rounded"
-  >
+    className="border px-4 py-2 rounded">
+
     Filter
   </button>
 
   <button
     onClick={() => {
-      setFilter({ userId: "", role: "", isBlocked: "" });
-      setIsLoading(true);
-      setTimeout(fetchUsers, 0);
+      setFilter({ userId: "", role: "", isBlocked: false });
+      fetchUsers();
     }}
     className="border px-4 py-2 rounded"
   >
@@ -133,7 +142,7 @@ useEffect(() => {
 
 {/*Table*/}
 <div className = "w-full h-full border-[3px] ">
-    {isLoading?<Loader/>: <table>
+    {isLoading?<Loader/>: <table className="w-full border-collapse">
   <thead>
     <tr>
        <th className="p-[10px]"> Profile Image</th>
@@ -205,7 +214,7 @@ useEffect(() => {
                               console.log("User deleted successfully");
                               console.log(res.data);
                               toast.success("User deleted successfully");
-                             setIsLoading(!isLoading);
+                             fetchUsers();
                             }
                           ).catch(
                             (error)=>{

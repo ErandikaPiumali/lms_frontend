@@ -3,6 +3,10 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import uploadFile from "../../src/utils/mediaUploader";
+
+
+
 
 
 export default function AddUsersAdminPage(){
@@ -102,22 +106,29 @@ setErrors(newErrors);
  
 }
 
+
+
 function handleChange(e) {
-  const { name, value } = e.target;
+  const { name, value, type, files } = e.target;
 
   setFormData(prev => ({
     ...prev,
-    [name]: value
+    [name]: type=== "file" ? files[0] :value
   }));
 }
 
 
-function handleSubmit(){
+async function handleSubmit(){
   setServerError("");
   if(!validationForm())
     return;
 
     const userData ={ ...formData };
+try{
+    if (formData.profilePic) {
+      const imageUrl = await uploadFile(formData.profilePic);
+      userData.profilePic = imageUrl;
+    }
 
  if (userData.role !== "Student") {
   delete userData.classLevel;
@@ -137,33 +148,36 @@ function handleSubmit(){
     window.location.href="/login";
     return;
   }
-  axios.post(import.meta.env.VITE_BACKEND_URL + "/api/users", userData,{
+  const res = await axios.post(import.meta.env.VITE_BACKEND_URL + "/api/users", userData,{
     headers:{
         Authorization:"Bearer " + token
     }
-  }).then((res)=>{
+  }
+);
    toast.success ("User created Successfully")
-    console.log("User creates successfully");
+   console.log(res.data);
     navigate("/admin/users")
-    console.log(res.data);
-  
-  }).catch((error)=>{
-  const msg = error.response?.data?.message || "Something went wrong";
-  toast.error("Failed to add user")
-  setServerError(msg);
-  console.error("Error adding user: ", error );
-})
-  console.log(userData)
+
+ } catch (error) {
+    const msg = error.response?.data?.message || "Something went wrong";
+
+    toast.error("Failed to add user");
+    setServerError(msg);
+
+    console.error("Error adding user:", error);
+  }
 }
+  
+
 
 const isStudent =formData.role === "Student";
 const isAdultStudent = formData.classLevel === "Adult";
 
 
     return(
-        <div className="w-full h-full flex justify-center items-center">
+        <div className="w-full h-full flex justify-center items-center bg-gray-100 text-black">
 
-<div className=" border-[3px] rounded-[15px] flex flex-wrap justify-between p-[40px]">
+<div className=" w-[700px] border-[3px] rounded-[15px] flex flex-wrap justify-between p-[40px]">
 
    
      <div className="w-[200px] flex flex-col gap-[5px]">
@@ -253,7 +267,7 @@ className="w-full border h-[40px] rounded-md shadow-lg"/>
   </span>
 )}
 </div>
- <div className="w-[200px] flex flex-col gap-[5px]">
+ <div className="w-[250px] flex flex-col gap-[5px]">
 <label className="text-sm font-semibold">Notifications </label>
 
 <select id="notifications" name="notifications"
@@ -380,11 +394,11 @@ onChange={handleChange}
 
     </div>
 
-     <div className="w-[200px] flex flex-col gap-[5px]">
+     <div className="w-[400px] flex flex-col gap-[5px]">
 <label className="text-sm font-semibold"> Profile picture </label>
-<input type="text"
+<input type="file"
 name="profilePic"
-value={formData.profilePic}
+
 onChange={handleChange}
 className="w-full border h-[40px] rounded-md shadow-lg"/>
 
@@ -395,7 +409,7 @@ className="w-full border h-[40px] rounded-md shadow-lg"/>
     <Link to={"/admin/users"} className="w-[200px] h-[40px] bg-white text-black rounded-md flex justify-center items-center border-[2px] shadow-lg"> Cancel</Link>
 
 
-</div>
+
 {serverError && (
   <div className="text-red-500 text-sm w-full text-center mb-2">
     {serverError}
@@ -403,10 +417,10 @@ className="w-full border h-[40px] rounded-md shadow-lg"/>
 )}
 <button
   onClick={handleSubmit}
-  className="w-[200px] h-[50px] bg-blue-500 text-white rounded-md flex justify-center items-center border-[2px] ml-[20px]">
+  className="w-[200px] h-[40px] bg-blue-500 text-white rounded-md flex justify-center items-center border-[2px] ml-[20px]">
   Add User
 </button>
-
+</div>
 
 
 </div>

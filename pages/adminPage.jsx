@@ -11,11 +11,20 @@ import UpdateUsersAdminPage from "./admin/updateUsersAdminPage";
 
 
 
+
 export default function AdminPage(){
     return(
        <div className="w-full min-h-screen flex">
+
+
             <div className="w-[300px] min-h-screen flex flex-col items-center bg-gray-100 text-black">
-                <span className="text-3xl font-bold my-5">Profile Details</span> 
+
+                 <img
+                    src="/class_logo.png"
+                    alt="Logo"
+                    className="w-[120px] h-[120px] object-contain mt-5 rounded-full"
+                />
+                <span className="text-3xl font-bold my-5">Class Details</span> 
 
                 <Link className="flex flex-row h-[60px] w-full p-[20px] items-center text-xl gap-[25px]" to="dashboard"><MdDashboard />Admin Dashboard </Link>
                 
